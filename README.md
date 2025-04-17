@@ -1,96 +1,95 @@
-# Cookie Cats Retention Analysis: A/B Testing, Predictive Modeling, and Behavioral Insight
+# In-Game Ad Timing Optimization through Retention Modeling
 
-This project analyzes how in-game ad placement affects player retention in a mobile game. Specifically, we assess whether showing an ad after level 30 (Group A) or level 40 (Group B) impacts Day 1 and Day 7 retention.
-
-We treat this as a product experimentation case, combining hypothesis testing with machine learning and model interpretability to guide potential design decisions.
+This project analyzes player behavior from a mobile puzzle game to determine the optimal timing for in-game advertisements that maximizes retention without compromising monetization. The analysis combines statistical testing, behavioral segmentation, and explainable machine learning to provide actionable recommendations to product and monetization teams.
 
 ---
 
-## Project Objectives
+## Objective
 
-- Evaluate the causal impact of ad placement timing on player retention
-- Build a predictive model to estimate likelihood of 7-day retention
-- Use SHAP to interpret model decisions and surface key behavioral drivers
-- Quantify behavioral thresholds to inform segmentation or personalization strategy
+To identify how early in-game ad placement impacts user retention. Specifically, the project investigates whether displaying ads after level 1 (gate_30) versus level 2 (gate_40) affects short- and long-term player engagement, with the goal of optimizing ad strategy based on user behavior.
 
 ---
 
 ## Dataset
 
-- ~90,000 user records from the mobile game *Cookie Cats*
-- Columns include:
-  - `userid`
-  - `version` (gate_30 or gate_40)
-  - `sum_gamerounds` (gameplay activity before Day 1)
-  - `retention_1`, `retention_7` (binary retention labels)
-- Additional features generated in this project:
-  - `version_encoded` (for modeling)
-  - `model_pred` (XGBoost probability)
-  - `shap_gamerounds`, `shap_version` (SHAP explanations)
-  - `engagement_level` (binned early activity levels)
+The dataset consists of 90,000+ user sessions from the game "Cookie Cats," with each user randomly assigned to one of two test groups:
+- `gate_30`: Ads shown after level 1
+- `gate_40`: Ads shown after level 2
+
+Features include:
+- Total number of game rounds played (`sum_gamerounds`)
+- Binary retention indicators for Day 1 (`retention_1`) and Day 7 (`retention_7`)
+- Test group assignment (`version`)
 
 ---
 
 ## Methodology
 
-1. **A/B Testing**  
-   Two-sample t-tests to compare Day 1 and Day 7 retention across experiment groups.
+1. **Exploratory Data Analysis**
+   - Segmented users by early engagement level
+   - Visualized gameplay distributions and retention funnels
+   - Identified behavioral thresholds for retention
 
-2. **Effect Size Estimation**  
-   Calculated Cohen’s d to measure practical impact in addition to statistical significance.
+2. **A/B Testing**
+   - Performed chi-squared test on Day 7 retention rates between test groups
+   - Result: Statistically significant difference (p = 0.0016), favoring later ad display
 
-3. **Predictive Modeling**  
-   Trained an XGBoost classifier to predict 7-day retention using early gameplay metrics.
+3. **Retention Modeling**
+   - Trained an XGBoost classifier to predict 7-day retention
+   - Model evaluation:
+     - Accuracy: 87.0%
+     - Precision: 71.2%
+     - Recall: 50.6%
+     - ROC AUC: 0.886
 
-4. **Explainability**  
-   Used SHAP to quantify feature importance and explain individual predictions.
-
-5. **Segmentation**  
-   Binned users by gameplay behavior and analyzed retention patterns across segments.
-
----
-
-## Results Summary
-
-### A/B Test
-
-- **Day 1 retention**: No statistically significant difference (p > 0.05)
-- **Day 7 retention**: Statistically significant difference (p < 0.01), but **Cohen’s d = 0.021**, indicating a **very small practical effect**
-
-### Predictive Modeling
-
-- **AUC (XGBoost)**: ~0.89
-- `sum_gamerounds` was the dominant predictor of retention
-- SHAP confirmed that user engagement drives model decisions more than ad group
+4. **SHAP Explainability**
+   - Applied SHAP to understand the impact of `sum_gamerounds` and `version_encoded` on retention predictions
+   - Local explanation showed that low-engagement users had significantly lower predicted retention probabilities
 
 ---
 
-## Retention by Early Gameplay: Behavioral Threshold Analysis
+## Results and Insights
 
-To better understand the relationship between early engagement and long-term retention, we grouped users based on the number of game rounds played before Day 1. We then calculated the 7-day retention rate within each group.
-
-| Engagement Level (Game Rounds) | Users  | Retained | Retention Rate |
-|-------------------------------|--------|----------|----------------|
-| 0–5                           | 21,725 | 259      | 1.2%           |
-| 6–10                          | 12,594 | 319      | 2.5%           |
-| 11–25                         | 19,204 | 1,337    | 6.9%           |
-| 26–50                         | 13,604 | 2,227    | 16.9%          |
-| 51–100                        | 8,753  | 3,079    | 35.2%          |
-| 101–250                       | 2,893  | 1,795    | 63.6%          |
-| 250+                          | 3,720  | 3,303    | 88.7%          |
-
-### Interpretation
-
-- The majority of users churn quickly: players who engage in fewer than 10 rounds have a <3% chance of returning by Day 7.
-- There is a significant behavioral inflection point between 25 and 50 rounds. Players in this range are ~6x more likely to return than those in the lowest bin.
-- Users playing more than 100 rounds retain at levels above 60%, indicating high product-market fit.
-- The top-tier segment (250+ rounds) has an exceptionally high retention rate (~89%), suggesting a small but extremely committed user group likely responsible for a disproportionate share of long-term engagement and potential revenue.
+- **Engagement is the dominant driver of retention**. Only 1.3% of users who played fewer than 5 rounds returned after 7 days.
+- **Highly engaged users (>50 rounds)** had a 7-day retention rate of 54.8%.
+- **Ad timing has a measurable but secondary impact**. Users in the `gate_40` group retained slightly better than those in `gate_30`, with a statistically significant difference.
+- SHAP confirmed that retention is primarily determined by early gameplay behavior, not test group alone.
 
 ---
 
-## Product Recommendations
+## Recommendations
 
-- Move the ad gate to **level 40** to avoid penalizing users who are still ramping up engagement.
-- Focus retention efforts on users with 25–100 rounds — this is the conversion zone where incremental lifts are most likely.
-- Avoid targeting users under 10 rounds for retention or monetization — their churn rate is too high to justify cost.
-- Consider real-time modeling to assign users into engagement tiers and adjust ad timing, tutorial content, or bonus structures accordingly.
+- Do not show ads to users who play fewer than 5 rounds. These users are highly likely to churn and should not be disrupted.
+- Consider delaying ads for high-engagement users to preserve long-term retention.
+- Implement dynamic ad logic based on real-time engagement thresholds.
+
+---
+
+## Visual Summary
+
+**Game Rounds vs Retention (7-Day)**  
+![Game Rounds Distribution](plots/gamerounds_by_retention.png)
+
+**Retention by Engagement and Test Group**  
+![Retention by Engagement and Version](plots/retention_by_engagement_and_version.png)
+
+**Retention Funnel**  
+![Retention Funnel](plots/retention_funnel.png)
+
+**Retention by A/B Group**  
+![Retention by Version](plots/retention_by_version.png)
+
+**ROC Curve (XGBoost)**  
+![ROC Curve](plots/roc_curve_xgboost_retention_model.png)
+
+**SHAP Feature Importance**  
+![SHAP Summary](plots/shap_summary.png)
+
+---
+
+## Tools and Technologies
+
+- Python, Pandas, NumPy
+- Seaborn, Matplotlib
+- Scikit-learn, XGBoost
+- SHAP, SciPy
