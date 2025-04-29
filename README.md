@@ -1,6 +1,6 @@
 # In-Game Ad Timing Optimization through Retention Modeling
 
-This project analyzes player behavior from a mobile puzzle game to determine the optimal timing for in-game advertisements that maximizes retention without compromising monetization. The analysis combines statistical testing, behavioral segmentation, and explainable machine learning to provide actionable recommendations to product and monetization teams.
+This project analyzes player behavior from a mobile puzzle game to determine the optimal timing for in-game advertisements that maximizes retention without compromising monetization. The analysis combines A/B testing, statistical testing, behavioral segmentation, and explainable machine learning to provide actionable recommendations to product and monetization teams.
 
 ---
 
